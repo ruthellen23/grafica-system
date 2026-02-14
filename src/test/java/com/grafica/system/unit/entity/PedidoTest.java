@@ -1,5 +1,7 @@
-package com.grafica.system.entity;
+package com.grafica.system.unit.entity;
 
+import com.grafica.system.entity.ItemPedido;
+import com.grafica.system.entity.Pedido;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;

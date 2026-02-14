@@ -1,4 +1,4 @@
-package com.grafica.system.service;
+package com.grafica.system.unit.service;
 
 import com.grafica.system.entity.Cliente;
 import com.grafica.system.entity.Pedido;
@@ -7,6 +7,7 @@ import com.grafica.system.enums.TipoUsuario;
 import com.grafica.system.repository.ClienteRepository;
 import com.grafica.system.repository.PedidoRepository;
 import com.grafica.system.repository.UsuarioRepository;
+import com.grafica.system.service.PedidoService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,9 +1,10 @@
-package com.grafica.system.service;
+package com.grafica.system.unit.service;
 
 import com.grafica.system.entity.Pedido;
 import com.grafica.system.enums.StatusPedido;
 import com.grafica.system.repository.PedidoRepository;
 import com.grafica.system.repository.ProdutoRepository;
+import com.grafica.system.service.RelatorioService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

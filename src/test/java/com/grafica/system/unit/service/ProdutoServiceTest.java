@@ -1,4 +1,4 @@
-package com.grafica.system;
+package com.grafica.system.unit.service;
 
 import com.grafica.system.dto.ProdutoRequest;
 import com.grafica.system.entity.Produto;
