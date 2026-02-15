@@ -1,5 +1,6 @@
 package com.grafica.system.integration;
 
+import com.grafica.system.config.TestSecurityConfig;
 import com.grafica.system.entity.Usuario;
 import com.grafica.system.enums.TipoUsuario;
 import com.grafica.system.repository.UsuarioRepository;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
 class PedidoIntegrationTest {
 
     @Autowired
@@ -33,16 +36,14 @@ class PedidoIntegrationTest {
     @BeforeEach
     void setup() {
         usuarioRepository.deleteAll();
-
         Usuario admin = new Usuario();
         admin.setNome("Administrador");
         admin.setUsername("admin");
         admin.setEmail("admin@grafica.com");
         admin.setSenha("123456");
-        admin.setTipo(TipoUsuario.ADMIN);
         admin.setAtivo(true);
+        admin.setTipo(TipoUsuario.ADMIN);
         admin.setDataCadastro(LocalDateTime.now());
-
         usuarioRepository.save(admin);
     }
 
