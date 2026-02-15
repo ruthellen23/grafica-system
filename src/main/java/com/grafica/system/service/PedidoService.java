@@ -8,7 +8,7 @@ import com.grafica.system.enums.TipoUsuario;
 import com.grafica.system.repository.ClienteRepository;
 import com.grafica.system.repository.PedidoRepository;
 import com.grafica.system.repository.ProdutoRepository;
-import com.grafica.system.repository.UsuarioRepository; // Adicionado
+import com.grafica.system.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,14 +24,14 @@ public class PedidoService {
     private final ProdutoRepository produtoRepository;
     private final UsuarioRepository usuarioRepository;
 
-    private Usuario buscarUsuarioLogado(String username) {
-        return usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado no banco: " + username));
+    private Usuario buscarUsuarioPorEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado no banco: " + email));
     }
 
     @Transactional
-    public Pedido criarPedido(PedidoRequest request, String username) {
-        Usuario usuario = buscarUsuarioLogado(username);
+    public Pedido criarPedido(PedidoRequest request, String email) {
+        Usuario usuario = buscarUsuarioPorEmail(email);
 
         Cliente cliente = clienteRepository.findById(request.getClienteId())
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
@@ -81,8 +81,8 @@ public class PedidoService {
         return pedido;
     }
 
-    public List<Pedido> listarPedidos(String username) {
-        Usuario usuario = buscarUsuarioLogado(username);
+    public List<Pedido> listarPedidos(String email) {
+        Usuario usuario = buscarUsuarioPorEmail(email);
 
         if (usuario.getTipo() == TipoUsuario.ADMIN) {
             return pedidoRepository.findAll();
@@ -93,8 +93,8 @@ public class PedidoService {
         }
     }
 
-    public Pedido buscarPorId(Long id, String username) {
-        Usuario usuario = buscarUsuarioLogado(username);
+    public Pedido buscarPorId(Long id, String email) {
+        Usuario usuario = buscarUsuarioPorEmail(email);
 
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
@@ -121,5 +121,9 @@ public class PedidoService {
 
     public List<Pedido> listarPorStatus(StatusPedido status) {
         return pedidoRepository.findByStatus(status);
+    }
+
+    public List<Pedido> listarTodos() {
+        return pedidoRepository.findAll();
     }
 }

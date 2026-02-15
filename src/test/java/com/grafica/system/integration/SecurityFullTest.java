@@ -12,11 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority; // Adicionado
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,14 +39,16 @@ class SecurityFullTest {
     @BeforeEach
     void setup() {
         usuarioRepository.deleteAll();
+
         Usuario admin = new Usuario();
         admin.setNome("Admin Teste");
         admin.setUsername("admin");
         admin.setEmail("admin@teste.com");
-        admin.setSenha("123");
+        admin.setKeycloakId("uuid-admin-teste");
         admin.setTipo(TipoUsuario.ADMIN);
         admin.setAtivo(true);
         admin.setDataCadastro(LocalDateTime.now());
+
         usuarioRepository.save(admin);
     }
 
@@ -54,13 +58,31 @@ class SecurityFullTest {
         mockMvc.perform(get(url)
                         .with(jwt()
                                 .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))
-                                .jwt(builder -> builder.claim("preferred_username", "admin"))))
+                                .jwt(builder -> builder
+                                        .claim("sub", "uuid-admin-teste")
+                                        .claim("name", "Admin Teste")
+                                        .claim("preferred_username", "admin")
+                                        .claim("email", "admin@teste.com")
+                                        .claim("realm_access", Map.of("roles", List.of("ADMIN")))
+                                )))
                 .andExpect(status().isOk());
     }
 
     @Test
     void endpointsPublicosDevemEstarAcessiveis() throws Exception {
         mockMvc.perform(get("/produtos"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void deveListarUsuariosComoAdmin() throws Exception {
+        mockMvc.perform(get("/usuarios")
+                        .with(jwt()
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                                .jwt(j -> j
+                                        .claim("sub", "uuid-admin-teste")
+                                        .claim("name", "Admin User")
+                                        .claim("preferred_username", "admin"))))
                 .andExpect(status().isOk());
     }
 }

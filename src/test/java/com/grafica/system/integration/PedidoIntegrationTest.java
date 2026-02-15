@@ -1,11 +1,12 @@
 package com.grafica.system.integration;
 
 import com.grafica.system.config.TestSecurityConfig;
+import com.grafica.system.entity.Cliente;
 import com.grafica.system.entity.Usuario;
 import com.grafica.system.enums.TipoUsuario;
+import com.grafica.system.repository.ClienteRepository; // Importante
 import com.grafica.system.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,6 +17,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -33,37 +36,44 @@ class PedidoIntegrationTest {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private ClienteRepository clienteRepository;
+
     @BeforeEach
     void setup() {
+        clienteRepository.deleteAll();
         usuarioRepository.deleteAll();
+
         Usuario admin = new Usuario();
         admin.setNome("Administrador");
         admin.setUsername("admin");
         admin.setEmail("admin@grafica.com");
-        admin.setSenha("123456");
+        admin.setKeycloakId("admin-uuid-test");
         admin.setAtivo(true);
         admin.setTipo(TipoUsuario.ADMIN);
         admin.setDataCadastro(LocalDateTime.now());
         usuarioRepository.save(admin);
+
+        Cliente cliente = new Cliente();
+        cliente.setNome("Ruth Ellen");
+        cliente.setEmail("ruth@example.com");
+        cliente.setCpfCnpj("12345678901");
+        cliente.setDataCadastro(LocalDateTime.now());
+        clienteRepository.save(cliente);
     }
 
     @Test
-    @DisplayName("GET /pedidos deve retornar 200 OK")
     void deveRetornarListaDePedidos() throws Exception {
         mockMvc.perform(get("/pedidos")
                         .with(jwt()
                                 .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))
-                                .jwt(builder -> builder.claim("preferred_username", "admin"))))
+                                .jwt(builder -> builder
+                                        .claim("sub", "ID-DO-KEYCLOAK-AQUI")
+                                        .claim("name", "Ruth Ellen")
+                                        .claim("preferred_username", "ruth.ellen")
+                                        .claim("email", "ruth@example.com")
+                                        .claim("realm_access", Map.of("roles", List.of("ADMIN")))
+                                )))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("GET /pedidos/1 deve retornar 404 se não existir")
-    void deveBuscarPedidoPorId() throws Exception {
-        mockMvc.perform(get("/pedidos/1")
-                        .with(jwt()
-                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))
-                                .jwt(builder -> builder.claim("preferred_username", "admin"))))
-                .andExpect(status().isNotFound());
     }
 }

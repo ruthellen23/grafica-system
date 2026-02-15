@@ -36,14 +36,17 @@ class PedidoServiceTest {
     @Test
     @DisplayName("Deve barrar cliente tentando ver pedido de outro cliente")
     void deveBarrarAcessoIndevido() {
-        String username = "maria";
+        String emailTeste = "maria@email.com";
+
         Usuario maria = new Usuario();
-        maria.setUsername(username);
-        maria.setEmail("maria@email.com");
+        maria.setKeycloakId("uuid-keycloak-maria");
+        maria.setUsername("maria");
+        maria.setEmail(emailTeste);
         maria.setTipo(TipoUsuario.CLIENTE);
 
         Cliente clienteMaria = new Cliente();
         clienteMaria.setId(1L);
+        clienteMaria.setEmail(emailTeste);
 
         Cliente clienteJoao = new Cliente();
         clienteJoao.setId(2L);
@@ -52,12 +55,12 @@ class PedidoServiceTest {
         pedidoJoao.setId(10L);
         pedidoJoao.setCliente(clienteJoao);
 
-        when(usuarioRepository.findByUsername(username)).thenReturn(Optional.of(maria));
+        when(usuarioRepository.findByEmail(emailTeste)).thenReturn(Optional.of(maria));
         when(pedidoRepository.findById(10L)).thenReturn(Optional.of(pedidoJoao));
-        when(clienteRepository.findByEmail("maria@email.com")).thenReturn(Optional.of(clienteMaria));
+        when(clienteRepository.findByEmail(emailTeste)).thenReturn(Optional.of(clienteMaria));
 
         assertThrows(RuntimeException.class, () -> {
-            pedidoService.buscarPorId(10L, username);
+            pedidoService.buscarPorId(10L, emailTeste);
         });
     }
 }

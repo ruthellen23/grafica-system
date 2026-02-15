@@ -30,15 +30,16 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
     container_name: keycloak
-    command: start-dev
+    # Comando simplificado sem o prefixo /auth
+    command: start-dev --hostname-strict=false
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres-keycloak:5432/keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: keycloak123
-      KC_HOSTNAME_STRICT: false
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
     ports:
       - "8180:8080"
     depends_on:
@@ -47,13 +48,12 @@ services:
       - grafica-network
 
   api-grafica:
-    build: . # Ele vai usar o seu Dockerfile
+    build: .
     container_name: api-grafica
     ports:
       - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-grafica:5432/grafica_db
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/realms/grafica-realm
+    extra_hosts:
+      - "localhost:host-gateway"
     depends_on:
       - db-grafica
       - keycloak

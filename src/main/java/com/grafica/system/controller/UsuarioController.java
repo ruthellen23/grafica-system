@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @RestController
 @RequestMapping("/usuarios")
 @RequiredArgsConstructor
@@ -23,13 +24,13 @@ public class UsuarioController {
     private final UsuarioRepository usuarioRepository;
 
     @GetMapping
-    @Operation(summary = "Listar todos os usuários", description = "Apenas ADMIN")
+    @Operation(summary = "Listar todos os usuários", description = "Retorna todos os usuários sincronizados no banco local.")
     public ResponseEntity<List<Usuario>> listarTodos() {
         return ResponseEntity.ok(usuarioRepository.findAll());
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Buscar usuário por ID", description = "Apenas ADMIN")
+    @Operation(summary = "Buscar usuário por ID")
     public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
         return usuarioRepository.findById(id)
                 .map(ResponseEntity::ok)
@@ -37,11 +38,13 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar usuário", description = "Apenas ADMIN")
+    @Operation(summary = "Atualizar usuário", description = "Atualiza dados cadastrais. O Keycloak ID e E-mail são imutáveis.")
     public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
         return usuarioRepository.findById(id)
                 .map(usuarioExistente -> {
                     usuarioExistente.setNome(usuario.getNome());
+                    usuarioExistente.setTipo(usuario.getTipo());
+                    usuarioExistente.setAtivo(usuario.getAtivo());
                     return ResponseEntity.ok(usuarioRepository.save(usuarioExistente));
                 })
                 .orElse(ResponseEntity.notFound().build());
